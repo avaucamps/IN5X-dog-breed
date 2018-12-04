@@ -5,36 +5,32 @@ import os
 import sys
 import zipfile
 import numpy as np
-
-default_train_dir = 'train/'
-custom_train_dir = 'train_custom/'
-custom_validation_dir = 'validation_custom/'
+from constants import train_data_dir, validation_data_dir, default_train_dir, labels_path, labels_zip_path
 
 def prepare_dataset():
-    ''' Method to be called at the beginning to prepare the dataset. 
-    If the dataset is still in zip files it is extracted.
-    If the training and validation directories have not been created, they are created and the training
-    and validation images are copied in those directories.
+    ''' 
+    Extracts dataset if needed. 
+    Creates and populates training and validation directories if needed.
     '''
     unzip_dataset()
-    labels = pd.read_csv('labels.csv')
+    labels = pd.read_csv(labels_path)
     cross_validation_indexes = get_cross_validation_indexes(len(labels))
     
-    if not os.path.exists('train_custom'):
+    if not os.path.exists(train_data_dir):
         map_training_pictures_to_labels(labels, cross_validation_indexes)
-    if not os.path.exists('validation_custom'):
+    if not os.path.exists(validation_data_dir):
         map_validation_pictures_to_labels(labels, cross_validation_indexes)
 
 def unzip_dataset():
-    if not os.path.exists('labels.csv'):
-        labels_zip = zipfile.ZipFile('labels.csv.zip')
+    if not os.path.exists(labels_path) and os.path.exists(labels_zip_path):
+        labels_zip = zipfile.ZipFile(labels_zip_path)
         labels_zip.extractall()
-    if not os.path.exists('train'):
-        train_images_zip = zipfile.ZipFile('train.zip')
+    if not os.path.isdir('train'):
+        train_images_zip = zipfile.ZipFile(default_train_dir + '.zip')
         train_images_zip.extractall()
     
 def map_training_pictures_to_labels(labels, cross_validation_indexes):
-    create_directory(custom_train_dir)
+    create_directory(train_data_dir)
 
     index = 0
     for filename, class_name in labels.values:
@@ -43,10 +39,10 @@ def map_training_pictures_to_labels(labels, cross_validation_indexes):
             continue
 
         # Create subdirectory with `class_name`
-        create_directory(custom_train_dir + class_name)
+        create_directory(train_data_dir + class_name)
 
         src_path = default_train_dir + filename + '.jpg'
-        dst_path = custom_train_dir + class_name + '/' + filename + '.jpg'
+        dst_path = train_data_dir + class_name + '/' + filename + '.jpg'
             
         index = index + 1
 
@@ -60,7 +56,7 @@ def map_training_pictures_to_labels(labels, cross_validation_indexes):
                 .format(src_path, dst_path, sys.exc_info())) 
 
 def map_validation_pictures_to_labels(labels, cross_validation_indexes):
-    create_directory(custom_validation_dir)   
+    create_directory(validation_data_dir)   
 
     index = 0
     for filename, class_name in labels.values:
@@ -69,10 +65,10 @@ def map_validation_pictures_to_labels(labels, cross_validation_indexes):
             continue
 
         # Create subdirectory with `class_name`
-        create_directory(custom_validation_dir + class_name)
+        create_directory(validation_data_dir + class_name)
 
         src_path = default_train_dir + filename + '.jpg'
-        dst_path = custom_validation_dir + class_name + '/' + filename + '.jpg'
+        dst_path = validation_data_dir + class_name + '/' + filename + '.jpg'
             
         index = index + 1
 
