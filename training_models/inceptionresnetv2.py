@@ -1,26 +1,21 @@
 import numpy as np
-from keras.preprocessing.image import ImageDataGenerator
+from image import ImageDataGenerator
 from keras.preprocessing import image
 from keras.layers import Dropout, Flatten, Dense
-from keras.applications import InceptionV3
+from keras.applications import InceptionResNetV2, Xception
 from keras.models import Model, Sequential
 from keras.layers import Dense, GlobalAveragePooling2D
 from keras import backend as K
-from keras.applications.resnet50 import preprocess_input
-from dataset_helper import prepare_dataset
+import matplotlib.pyplot as plt
 
 batch_size = 64
-image_size = 75
+image_size = 299
 
-prepare_dataset()
 train_data_path = 'D:/Deep-learning/dog-breed-identification/Dataset/train_custom/'
 validation_data_path = 'D:/Deep-learning/dog-breed-identification/Dataset/validation_custom/'
 
 train_data_generator = ImageDataGenerator(
     rescale = 1. / 255,
-    shear_range = 0.2,
-    zoom_range = 0.2,
-    horizontal_flip = True
 )
 
 validation_data_generator = ImageDataGenerator(
@@ -42,10 +37,10 @@ validation_generator = validation_data_generator.flow_from_directory(
     class_mode = 'categorical'
 )
 
-base_model = InceptionV3(
+base_model = InceptionResNetV2(
     weights = 'imagenet',
     include_top = False,
-    input_shape = (75, 75, 3)
+    input_shape = (299, 299, 3)
 )
 
 x = base_model.output
@@ -58,21 +53,40 @@ model = Model(
     outputs = predictions
 )
 
-model.summary()
+#model.summary()
 
 # keras way to freeze layers you don't want to train
 for layer in base_model.layers: layer.trainable = False
 
 model.compile(
-    optimizer = 'adam',
+    optimizer = 'sgd',
     loss = 'categorical_crossentropy',
     metrics = ['accuracy']
 )
 
-model.fit_generator(
+history = model.fit_generator(
     train_generator,
     train_generator.n // batch_size,
-    epochs = 10,
+    epochs = 12,
     validation_data = validation_generator,
     validation_steps = validation_generator.n // batch_size
 )
+
+model.save('inceptionresnetv2_weight_no_filter.h5')
+
+# summarize history for accuracy
+plt.plot(history.history['acc'])
+plt.plot(history.history['val_acc'])
+plt.title('Model accuracy for inceptionResNetV2')
+plt.ylabel('accuracy')
+plt.xlabel('epoch')
+plt.legend(['train', 'test'], loc='upper left')
+plt.show()
+# summarize history for loss
+plt.plot(history.history['loss'])
+plt.plot(history.history['val_loss'])
+plt.title('Model loss for inceptionResNetV2')
+plt.ylabel('loss')
+plt.xlabel('epoch')
+plt.legend(['train', 'test'], loc='upper left')
+plt.show()
