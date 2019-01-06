@@ -3,7 +3,7 @@ from image import ImageDataGenerator
 from keras.preprocessing import image
 from keras.layers import Dropout, Flatten, Dense
 from keras.applications import InceptionResNetV2, Xception
-from keras.models import Model, Sequential
+from keras.models import Model, Sequential, load_model
 from keras.layers import Dense, GlobalAveragePooling2D
 from keras import backend as K
 import matplotlib.pyplot as plt
@@ -16,6 +16,11 @@ validation_data_path = 'D:/Deep-learning/dog-breed-identification/Dataset/valida
 
 train_data_generator = ImageDataGenerator(
     rescale = 1. / 255,
+    contrast_stretching=False,
+    logarithmic=False,
+    gamma=False,
+    equalization=False,
+    adaptive_equalization=False
 )
 
 validation_data_generator = ImageDataGenerator(
@@ -37,7 +42,7 @@ validation_generator = validation_data_generator.flow_from_directory(
     class_mode = 'categorical'
 )
 
-base_model = InceptionResNetV2(
+""" base_model = InceptionResNetV2(
     weights = 'imagenet',
     include_top = False,
     input_shape = (299, 299, 3)
@@ -70,14 +75,26 @@ history = model.fit_generator(
     epochs = 12,
     validation_data = validation_generator,
     validation_steps = validation_generator.n // batch_size
+) """
+
+model = load_model('C:\\Users\\Antoine\\Desktop\\IN5X-dog-breed\\inceptionresnetv2_weight_gamma.h5')
+
+for layer in model.layers: layer.trainable = True
+
+history = model.fit_generator(
+    train_generator,
+    train_generator.n // batch_size,
+    epochs = 8,
+    validation_data = validation_generator,
+    validation_steps = validation_generator.n // batch_size
 )
 
-model.save('inceptionresnetv2_weight_no_filter.h5')
+model.save('inceptionresnetv2_weight_gamma.h5')
 
 # summarize history for accuracy
 plt.plot(history.history['acc'])
 plt.plot(history.history['val_acc'])
-plt.title('Model accuracy for inceptionResNetV2')
+plt.title('Model accuracy for gamma')
 plt.ylabel('accuracy')
 plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='upper left')
@@ -85,7 +102,7 @@ plt.show()
 # summarize history for loss
 plt.plot(history.history['loss'])
 plt.plot(history.history['val_loss'])
-plt.title('Model loss for inceptionResNetV2')
+plt.title('Model loss for gamma')
 plt.ylabel('loss')
 plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='upper left')
