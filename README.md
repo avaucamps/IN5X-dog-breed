@@ -1,16 +1,20 @@
 # Dog Breed Identification
 
-For the kaggle competition [dog breed identification](https://www.kaggle.com/c/dog-breed-identification) 
-I trained a few CNNs with Keras.
+Solution for [Kaggle's Dog Breed Identifiaction](https://www.kaggle.com/c/dog-breed-identification).
 
-Firstly I created some custom CNNs to see how good a custom one could do, but the scores were not 
-good ([custom_model.py](custom_model.py)). <br>
-Then I used bottleneck features with pre-trained CNNs and I started obtaining better results 
-([bottleneck_features.py](bottleneck_features.py)). <br>
-Finally I fine-tuned a pre-trained model (inceptionresnetv2) and obtained even better results 
-([inceptionresnetv2.py](inceptionresnetv2.py)). <br>
+## About
 
-Then I tried improving the results by adding image processing. I applied filters to the images, and found out that the
-filtering with the gamma correction slightly improved the results.
+> In this playground competition, you are provided a strictly canine subset of ImageNet in order to practice fine-grained image categorization. [source](https://www.kaggle.com/c/dog-breed-identification)
 
-With the fine-tuned inceptionresnetv2 model I achieved a public score of 0.30041 on Kaggle.
+## Solution
+
+### Fine-tuned pre-trained model.
+
+* Model: inceptionResNetV2
+* Image processing: gamma filtering (slightly improved the results).
+
+## Results
+
+> Submissions are evaluated on Multi Class Log Loss between the predicted probability and the observed target. [source](https://www.kaggle.com/c/dog-breed-identification/overview/evaluation)
+
+* Score: 0.30041.
